@@ -30,7 +30,13 @@ namespace LiOB{
             lint __get_seed(
                 lint address,
                 lint room_uid
-            ){ return address - room_uid * __seed_constant(); }
+            ){
+                logger.newlayer("__get_seed");
+                logger.log(logging::INFO, "address: " + convert_str(address));
+                logger.log(logging::INFO, "room_uid: " + convert_str(room_uid));
+                logger.poplayer();
+                return address - room_uid * __seed_constant(); 
+            }
 
             lint __get_addr(
                 lint seed,
@@ -127,7 +133,7 @@ namespace LiOB{
                 std::string nphrase = normalize_text(phrase);
 
                 const int n = max_simbols().convert_to<int>() - nphrase.size();
-                const int i_page_uid = std::stoi(page_uid);
+                const int i_page_uid = std::stoll(page_uid);
 
                 logger.log(logging::INFO, "phrase len: " + std::to_string(nphrase.size()));
 
@@ -151,10 +157,10 @@ namespace LiOB{
 
                 LiOB_address addr;
                 addr.room_uid = convert_base(convert_str(seed), 10, 36);
-                addr.wall = std::stoi(utils::str::to_string(page_uid[6]));
-                addr.shelf = std::stoi(utils::str::to_string(page_uid[5]));
-                addr.volume = std::stoi(page_uid.substr(3, 2));
-                addr.page = std::stoi(page_uid.substr(0, 3));
+                addr.wall = std::stoll(utils::str::to_string(page_uid[6]));
+                addr.shelf = std::stoll(utils::str::to_string(page_uid[5]));
+                addr.volume = std::stoll(page_uid.substr(3, 2));
+                addr.page = std::stoll(page_uid.substr(0, 3));
                 
                 logger.log(logging::INFO, "room id: " + convert_str(addr.room_uid).substr(0, 100));
                 logger.log(logging::INFO, "wall id: " + convert_str(addr.wall));
@@ -170,6 +176,9 @@ namespace LiOB{
                 const LiOB::LiOB_address &address
             ){
                 logger.newlayer("contentgen");
+
+                logger.log(logging::INFO, "room_uid: " + address.room_uid);
+
                 lint page_uid = lint{std::stoll(get_page_uid(address))};
                 lint seed = __get_seed(
                     lint(convert_base(address.room_uid, 36, 10)), 
