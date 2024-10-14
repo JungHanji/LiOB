@@ -112,7 +112,10 @@ namespace LiOB{
 
                     s_page = tmp + s_page;
                 }
+                logger.newlayer("get_page_uid");
+                logger.log(logging::INFO, "book uid: " + get_book_uid(address));
                 logger.log(logging::INFO, "page uid: " + s_page + get_book_uid(address));
+                logger.poplayer();
                 return s_page + get_book_uid(address);
             }
 
@@ -129,21 +132,22 @@ namespace LiOB{
                 logger.log(logging::INFO, "phrase len: " + std::to_string(nphrase.size()));
 
                 lint seed = 0;
-                for(int i = 0; i < nphrase.size(); i++){
+                for(int i = nphrase.size(); i >= 0; i--){
                     int charval = 0;
 
                     if(isalpha(nphrase[i])){
-                        charval = static_cast<int>(tolower(nphrase[i])) - static_cast<int>('a');
+                        charval = (int)nphrase[i] - (int)'a';
                     } else if(nphrase[i] == '.'){
                         charval = 28;
                     } else if(nphrase[i] == ','){
                         charval = 27;
                     }
 
-                    seed += i_page_uid * __seed_constant() + charval;
+                    seed += lint{(int)charval} * lint{config.charset.size()}^i;
                 }
 
                 logger.log(logging::INFO, "seed: " + convert_str(seed).substr(0, 100));
+                logger.log(logging::INFO, "input PAGE_UID string: " + page_uid);
 
                 LiOB_address addr;
                 addr.room_uid = convert_base(convert_str(seed), 10, 36);
@@ -166,14 +170,18 @@ namespace LiOB{
                 const LiOB::LiOB_address &address
             ){
                 logger.newlayer("contentgen");
-                lint page_uid = lint(get_page_uid(address));
+                lint page_uid = lint{std::stoll(get_page_uid(address))};
                 lint seed = __get_seed(
                     lint(convert_base(address.room_uid, 36, 10)), 
                     page_uid
                 );
 
-                logger.log(logging::INFO, "page_uid: " + convert_str(page_uid));
+                logger.log(logging::INFO, "page_uid (lint -> str): " + convert_str(page_uid));
                 logger.log(logging::INFO, "seed: " + convert_str(seed).substr(0, 100));
+                logger.log(logging::INFO, "wall id: " + convert_str(address.wall));
+                logger.log(logging::INFO, "shelf id: " + convert_str(address.shelf));
+                logger.log(logging::INFO, "volume id: " + convert_str(address.volume));
+                logger.log(logging::INFO, "page id: " + convert_str(address.page));
 
                 std::string result = convert_base(convert_str(seed), 10, 29, config.charset);
 
@@ -190,6 +198,7 @@ namespace LiOB{
                 }
 
                 logger.log(logging::WARNING, "Not enougth simbols: " + convert_str(result.size()));
+                logger.log(logging::INFO, "content for now: " + result.substr(0, 100));
                 
                 int n = max_simbols().convert_to<int>() - result.size();
                 long long nseed = ghash(seed);
