@@ -136,21 +136,40 @@ namespace LiOB{
                 const int i_page_uid = std::stoll(page_uid);
 
                 logger.log(logging::INFO, "phrase len: " + std::to_string(nphrase.size()));
+                logger.log(logging::INFO, "phrase content: " + nphrase.substr(0, 200));
 
+                logger.newlayer("seed compression");
+                logger.log(logging::INFO, "charset size: " + std::to_string(config.charset.size()));
                 lint seed = 0;
-                for(int i = nphrase.size(); i >= 0; i--){
+                for(int ci = nphrase.size() - 1, i = 0; ci >= 0; ci--, i++){
                     int charval = 0;
 
-                    if(isalpha(nphrase[i])){
-                        charval = (int)nphrase[i] - (int)'a';
-                    } else if(nphrase[i] == '.'){
+                    if(isalpha(nphrase[ci])){
+                        logger.log(logging::INFO, "isalpha: true");
+                        charval = (int)nphrase[ci] - (int)'a';
+                    } else if(nphrase[ci] == '.'){
+                        logger.log(logging::INFO, "is a dot: true");
                         charval = 28;
-                    } else if(nphrase[i] == ','){
+                    } else if(nphrase[ci] == ' '){
+                        logger.log(logging::INFO, "is a space: true");
                         charval = 27;
+                    } else if(nphrase[ci] == ','){
+                        logger.log(logging::INFO, "is a comma: true");
+                        charval = 26;
+                    } else {
+                        logger.log(logging::ERROR, "invalid character: " + std::to_string((int)nphrase[ci]));
                     }
 
-                    seed += lint{(int)charval} * lint{config.charset.size()}^i;
+                    lint magic_number = (i != 0) ? lint{(int)charval} * (lint{config.charset.size()}^(i-1)): 1;
+
+                    logger.log(logging::CALLING, "29^0 = " + convert_str((lint{config.charset.size()}^0)));
+                    logger.log(logging::INFO, "charval: " + std::to_string(charval) + " in nphrase at {" + std::to_string(i) + "} is " + utils::str::to_string(nphrase[ci]));
+                    logger.log(logging::INFO, "magic num: " + convert_str((magic_number)));
+                    logger.log(logging::CALLING, "seed p: " + convert_str(lint{(int)charval} * (magic_number)).substr(0, 100));
+                    logger.pause();
+                    seed += lint{(int)charval} * (magic_number);
                 }
+                logger.poplayer();
 
                 logger.log(logging::INFO, "seed: " + convert_str(seed).substr(0, 100));
                 logger.log(logging::INFO, "input PAGE_UID string: " + page_uid);

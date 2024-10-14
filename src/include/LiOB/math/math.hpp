@@ -14,13 +14,17 @@ namespace LiOB{
             throw std::invalid_argument("Bases must be in the range [2, 36]");
         }
 
+        // Проверка на отрицательное число
+        bool is_negative = number[0] == '-';
+        std::string abs_number = is_negative ? number.substr(1) : number; // Убираем знак для обработки
+
         // Используем стандартные символы, если набор пустой
         const std::string digits_in = custom_digits_in.empty() ? "0123456789abcdefghijklmnopqrstuvwxyz" : custom_digits_in;
         const std::string digits_out = custom_digits_out.empty() ? "0123456789abcdefghijklmnopqrstuvwxyz" : custom_digits_out;
 
         // Convert from 'from_base' to decimal
         lint decimal_value = 0;
-        for (char digit : number) {
+        for (char digit : abs_number) { // Используем абсолютное значение
             lint index = digits_in.find(tolower(digit));
             if (index == std::string::npos || index >= from_base) {
                 throw std::invalid_argument("Invalid character in number: " + utils::str::to_string(digit));
@@ -37,6 +41,12 @@ namespace LiOB{
         } while (decimal_value > 0);
 
         std::reverse(result.begin(), result.end());
+
+        // Добавляем знак обратно, если число было отрицательным
+        if (is_negative) {
+            result = "-" + result;
+        }
+
         return result;
     }
 

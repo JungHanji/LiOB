@@ -10,5 +10,10 @@ if "__main__" == __name__:
     file_path = args.file
     file_name = ".".join(path.basename(args.file).split(".")[:-1])
 
-    do(f"g++ -o {file_name} {file_path} -I src/include -lboost_system -lfmt")
-    do(f"mv ./{file_name} ./out")
+    o = do(f"g++ -o {file_name} {file_path} -I src/include -lboost_system -lfmt")
+    
+    if o == 0:
+        print("Successeful build")
+        do(f"mv ./{file_name} ./out")
+    else:
+        print("Failed to build")

@@ -37,6 +37,12 @@ namespace LiOB::logging {
             bool isActive;
         public:
 
+            void pause(std::string message = ""){
+                if(!isActive) return;
+                std::cout << colors::Fore.yellow << "[PAUSED (enter smth to continue)] " << colors::Fore.reset << message << std::endl;
+                char ch; std::cin >> ch;
+            }
+
             void setlayer(std::string layer){
                 if(!isActive) return;
                 if(logLayers && layer != layers.back()){
