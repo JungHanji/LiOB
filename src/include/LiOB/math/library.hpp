@@ -1,6 +1,6 @@
 #pragma once
 
-#include <MathLib/Random.hpp>
+#include "random.hpp"
 #include <utils/string.hpp>
 #include <utils/vector.hpp>
 
@@ -9,11 +9,23 @@
 #include "math.hpp"
 
 namespace LiOB{
+
+    std::string fill_with_spaces(std::string phrase, int max_len){
+        if(phrase.size() >= max_len)
+            return phrase;
+
+        int n = max_len - phrase.size();
+        for(int i = 0; i < n; i++){
+            phrase += " ";
+        }
+
+        return phrase;
+    }
+
     class Library{
             LiOB_config config;
 
-            lint __max_simbols() const noexcept { return config.lines_no * config.simbs_no; }
-            lint __seed_constant() { return lint{config.charset.size()} ^ lint{__max_simbols()}; }
+            lint __seed_constant() { return lint{config.charset.size()} ^ lint{max_simbols()}; }
 
             lint __get_seed(
                 lint address,
@@ -47,8 +59,8 @@ namespace LiOB{
                 lint query_len,
                 lint base = 29
             ){
-                lfloat log_num_of_texts = lfloat{__max_simbols()} * lfloat{lint{config.pages_no}} * blog(config.charset.size(), base.convert_to<lfloat>()) + blog(config.pages_no, base.convert_to<lfloat>());
-                lint num_of_simbs = __max_simbols();
+                lfloat log_num_of_texts = lfloat{max_simbols()} * lfloat{lint{config.pages_no}} * blog(config.charset.size(), base.convert_to<lfloat>()) + blog(config.pages_no, base.convert_to<lfloat>());
+                lint num_of_simbs = max_simbols();
 
                 return __aprox_content_search(query_len, num_of_simbs, log_num_of_texts, base);
             }
@@ -57,7 +69,7 @@ namespace LiOB{
                 lint title_len,
                 lint base = 29
             ){
-                lfloat log_num_of_texts = lfloat{__max_simbols()} * blog(config.charset.size(), base.convert_to<lfloat>());
+                lfloat log_num_of_texts = lfloat{max_simbols()} * blog(config.charset.size(), base.convert_to<lfloat>());
                 lint num_of_simbs = 25;
 
                 return __aprox_content_search(title_len, num_of_simbs, log_num_of_texts, base);
@@ -72,6 +84,10 @@ namespace LiOB{
             }
 
         public:
+        
+            lint max_simbols() const noexcept { return config.lines_no * config.simbs_no; }
+            
+            
             std::string get_book_uid(
                 const LiOB::LiOB_address &address
             ){
@@ -109,7 +125,7 @@ namespace LiOB{
             ){
                 std::string nphrase = normalize_text(phrase);
 
-                const int n = __max_simbols().convert_to<int>() - nphrase.size();
+                const int n = max_simbols().convert_to<int>() - nphrase.size();
                 const int i_page_uid = std::stoi(page_uid);
 
                 // eml::setseed(ghash(seed));
@@ -155,11 +171,11 @@ namespace LiOB{
 
                 std::string result = convert_base(convert_str(seed), 10, 29, config.charset);
 
-                if(result.size() > __max_simbols()){
-                    result = result.substr(0, __max_simbols().convert_to<int>());
+                if(result.size() > max_simbols()){
+                    result = result.substr(0, max_simbols().convert_to<int>());
                 }
 
-                int n = __max_simbols().convert_to<int>() - result.size();
+                int n = max_simbols().convert_to<int>() - result.size();
 
                 eml::setseed(ghash(seed));
                 for(int i = 0; i < n; i++){

@@ -17,8 +17,8 @@ int main(){
     std::cout << "Searching for phrase <" << phrase << ">: ";
     
     auto faddress = library.addressGen(
-        phrase, 
-        LiOB::convert_str(library.get_page_uid(address))
+        LiOB::fill_with_spaces(phrase, library.max_simbols().convert_to<int>()), 
+        library.get_page_uid(address)
     );
 
     std::cout << "Found at address: " << faddress.to_string() << std::endl;

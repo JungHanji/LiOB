@@ -1,7 +1,7 @@
 #pragma once
 
 #include <utils/string.hpp>
-#include <MathLib/Random.hpp>
+#include "random.hpp"
 #include <fmt/core.h>
 
 #include "math.hpp"
