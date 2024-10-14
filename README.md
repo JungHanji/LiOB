@@ -17,3 +17,4 @@ What it can't do for now, but have to in the future:
 - find title by address
 - find address by title
 - find address by content
+- provide a GUI for it
