@@ -1,8 +1,7 @@
 #pragma once
 
+#include <Logging/logger.hpp>
 #include "random.hpp"
-#include <utils/string.hpp>
-#include <utils/vector.hpp>
 
 #include "config.hpp"
 #include "address.hpp"
@@ -128,11 +127,7 @@ namespace LiOB{
                 const int n = max_simbols().convert_to<int>() - nphrase.size();
                 const int i_page_uid = std::stoi(page_uid);
 
-                // eml::setseed(ghash(seed));
-                for(int i = 0; i < n; i++){
-                    // result += eml::choice(utils::vec::brakestring(config.charset));
-                    nphrase += " ";
-                }
+                std::cout << "searching for " << phrase.size() << std::endl;
 
                 lint seed = 0;
                 for(int i = 0; i < nphrase.size(); i++){
