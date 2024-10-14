@@ -11,4 +11,4 @@ if "__main__" == __name__:
     file_name = ".".join(path.basename(args.file).split(".")[:-1])
 
     do(f"g++ -o {file_name} {file_path} -I src/include -lboost_system -lfmt")
-    do(f"mv ./* ./out")
+    do(f"mv ./{file_name} ./out")
