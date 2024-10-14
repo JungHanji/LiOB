@@ -23,6 +23,7 @@ namespace LiOB{
 
     class Library{
             LiOB_config config;
+            logging::Logger logger;
 
             lint __seed_constant() { return lint{config.charset.size()} ^ lint{max_simbols()}; }
 
@@ -74,8 +75,6 @@ namespace LiOB{
                 return __aprox_content_search(title_len, num_of_simbs, log_num_of_texts, base);
             }
 
-            
-
             std::string normalize_text(std::string text){
                 std::transform(text.begin(), text.end(), text.begin(), tolower);
                 text.erase(std::remove_if(text.begin(), text.end(), [this](char c){ return std::find(config.charset.begin(), config.charset.end(), c) == config.charset.end(); }), text.end());
@@ -85,7 +84,6 @@ namespace LiOB{
         public:
         
             lint max_simbols() const noexcept { return config.lines_no * config.simbs_no; }
-            
             
             std::string get_book_uid(
                 const LiOB::LiOB_address &address
@@ -114,7 +112,7 @@ namespace LiOB{
 
                     s_page = tmp + s_page;
                 }
-
+                logger.log(logging::INFO, "page uid: " + s_page + get_book_uid(address));
                 return s_page + get_book_uid(address);
             }
 
@@ -122,12 +120,13 @@ namespace LiOB{
                 const std::string &phrase,
                 const std::string &page_uid
             ){
+                logger.newlayer("addressgen");
                 std::string nphrase = normalize_text(phrase);
 
                 const int n = max_simbols().convert_to<int>() - nphrase.size();
                 const int i_page_uid = std::stoi(page_uid);
 
-                std::cout << "searching for " << phrase.size() << std::endl;
+                logger.log(logging::INFO, "phrase len: " + std::to_string(nphrase.size()));
 
                 lint seed = 0;
                 for(int i = 0; i < nphrase.size(); i++){
@@ -144,39 +143,64 @@ namespace LiOB{
                     seed += i_page_uid * __seed_constant() + charval;
                 }
 
+                logger.log(logging::INFO, "seed: " + convert_str(seed).substr(0, 100));
+
                 LiOB_address addr;
                 addr.room_uid = convert_base(convert_str(seed), 10, 36);
                 addr.wall = std::stoi(utils::str::to_string(page_uid[6]));
                 addr.shelf = std::stoi(utils::str::to_string(page_uid[5]));
                 addr.volume = std::stoi(page_uid.substr(3, 2));
                 addr.page = std::stoi(page_uid.substr(0, 3));
-                std::cout << "page: " << addr.page << std::endl;
+                
+                logger.log(logging::INFO, "room id: " + convert_str(addr.room_uid).substr(0, 100));
+                logger.log(logging::INFO, "wall id: " + convert_str(addr.wall));
+                logger.log(logging::INFO, "shelf id: " + convert_str(addr.shelf));
+                logger.log(logging::INFO, "volume id: " + convert_str(addr.volume));
+                logger.log(logging::INFO, "page id: " + convert_str(addr.page));
 
+                logger.poplayer();
                 return addr;
             }
 
             std::string contentGen(
                 const LiOB::LiOB_address &address
             ){
+                logger.newlayer("contentgen");
                 lint page_uid = lint(get_page_uid(address));
                 lint seed = __get_seed(
                     lint(convert_base(address.room_uid, 36, 10)), 
                     page_uid
                 );
 
+                logger.log(logging::INFO, "page_uid: " + convert_str(page_uid));
+                logger.log(logging::INFO, "seed: " + convert_str(seed).substr(0, 100));
+
                 std::string result = convert_base(convert_str(seed), 10, 29, config.charset);
 
                 if(result.size() > max_simbols()){
+                    logger.log(logging::WARNING, "Too big amount of numbers: " + convert_str(result.size()));
                     result = result.substr(0, max_simbols().convert_to<int>());
+                    logger.log(logging::INFO, "content: " + result.substr(0, 100));
+                    logger.poplayer();
+                    return result;
+                } else if (result.size() == max_simbols()){
+                    logger.log(logging::INFO, "content: " + result.substr(0, 100));
+                    logger.poplayer();
+                    return result;
                 }
 
+                logger.log(logging::WARNING, "Not enougth simbols: " + convert_str(result.size()));
+                
                 int n = max_simbols().convert_to<int>() - result.size();
-
-                eml::setseed(ghash(seed));
+                long long nseed = ghash(seed);
+                eml::setseed(nseed);
+                logger.log(logging::INFO, "Setted new seed: " + convert_str(nseed));
                 for(int i = 0; i < n; i++){
                     result += eml::choice(utils::vec::brakestring(config.charset));
                 }
 
+                logger.log(logging::INFO, "content: " + result.substr(0, 100));
+                logger.poplayer();
                 return result;
             }
 
@@ -196,7 +220,7 @@ namespace LiOB{
 
             Library(
                 const LiOB_config& config
-            ): config(config) {}
+            ): config(config), logger(logging::BOTH ,"log_exe") {}
 
             Library(){}
             ~Library() = default;
