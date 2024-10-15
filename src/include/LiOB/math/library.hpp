@@ -160,13 +160,12 @@ namespace LiOB{
                         logger.log(logging::ERROR, "invalid character: " + std::to_string((int)nphrase[ci]));
                     }
 
-                    lint magic_number = (i != 0) ? lint{(int)charval} * (lint{config.charset.size()}^(i-1)): 1;
+                    lint magic_number = lint(bmul::pow(lfloat{config.charset.size()}, lfloat{i}));
 
-                    logger.log(logging::CALLING, "29^0 = " + convert_str((lint{config.charset.size()}^0)));
                     logger.log(logging::INFO, "charval: " + std::to_string(charval) + " in nphrase at {" + std::to_string(i) + "} is " + utils::str::to_string(nphrase[ci]));
                     logger.log(logging::INFO, "magic num: " + convert_str((magic_number)));
                     logger.log(logging::CALLING, "seed p: " + convert_str(lint{(int)charval} * (magic_number)).substr(0, 100));
-                    logger.pause();
+                    // logger.pause();
                     seed += lint{(int)charval} * (magic_number);
                 }
                 logger.poplayer();
