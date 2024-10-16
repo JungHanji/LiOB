@@ -13,17 +13,18 @@ namespace LiOB{
     using lfloat = bmul::cpp_dec_float_100;
 
     struct LiOB_config{
-        std::string charset = "abcdefghijklmnopqrstuvwxyz, .";
+        const std::string charset = "abcdefghijklmnopqrstuvwxyz, .";
 
-        int walls_no = 4;
-        int shelves_no = 5;
-        int volumes_no = 32;
+        static const int charset_no = 29;
+        static const int walls_no = 4;
+        static const int shelves_no = 5;
+        static const int volumes_no = 32;
 
-        int pages_no = 410;
-        int lines_no = 40;
-        int simbs_no = 80;
+        static const int pages_no = 410;
+        static const int lines_no = 40;
+        static const int simbs_no = 80;
 
         // Library of Babel Link base
-        int LBL_base = 36;
+        static const int LBL_base = 36;
     };
 }

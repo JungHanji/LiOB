@@ -25,7 +25,7 @@ namespace LiOB{
             LiOB_config config;
             logging::Logger logger;
 
-            lint __seed_constant() { return lint{config.charset.size()} ^ lint{max_simbols()}; }
+            lint __seed_constant() { return lint{bmul::pow(lfloat{config.charset.size()}, lfloat{max_simbols()})}; }
 
             lint __get_seed(
                 lint address,
@@ -144,6 +144,7 @@ namespace LiOB{
                 for(int ci = nphrase.size() - 1, i = 0; ci >= 0; ci--, i++){
                     int charval = 0;
 
+                    logger.log(logging::INFO, "char at: " + std::to_string(ci) + " and with index: " + std::to_string(i) + " is: " + nphrase[ci]);
                     if(isalpha(nphrase[ci])){
                         logger.log(logging::INFO, "isalpha: true");
                         charval = (int)nphrase[ci] - (int)'a';
@@ -162,8 +163,8 @@ namespace LiOB{
 
                     lint magic_number = lint(bmul::pow(lfloat{config.charset.size()}, lfloat{i}));
 
-                    logger.log(logging::INFO, "charval: " + std::to_string(charval) + " in nphrase at {" + std::to_string(i) + "} is " + utils::str::to_string(nphrase[ci]));
-                    logger.log(logging::INFO, "magic num: " + convert_str((magic_number)));
+                    // logger.log(logging::INFO, "charval: " + std::to_string(charval) + " in nphrase at {" + std::to_string(i) + "} is " + utils::str::to_string(nphrase[ci]));
+                    logger.log(logging::INFO, "magic num: " + convert_str((magic_number)).substr(0, 100));
                     logger.log(logging::CALLING, "seed p: " + convert_str(lint{(int)charval} * (magic_number)).substr(0, 100));
                     // logger.pause();
                     seed += lint{(int)charval} * (magic_number);
@@ -198,6 +199,7 @@ namespace LiOB{
                 logger.log(logging::INFO, "room_uid: " + address.room_uid);
 
                 lint page_uid = lint{std::stoll(get_page_uid(address))};
+                logger.log(logging::INFO, "room uid (36-base): " + convert_str(page_uid));
                 lint seed = __get_seed(
                     lint(convert_base(address.room_uid, 36, 10)), 
                     page_uid
@@ -219,6 +221,7 @@ namespace LiOB{
                     logger.poplayer();
                     return result;
                 } else if (result.size() == max_simbols()){
+                    logger.log(logging::INFO, "all set, max simbols");
                     logger.log(logging::INFO, "content: " + result.substr(0, 100));
                     logger.poplayer();
                     return result;

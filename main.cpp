@@ -26,7 +26,7 @@ int main(){
 
     std::string content = library.contentGen(faddress);
 
-    std::cout << "Content: " << content.substr(0, 200) << std::endl;
+    std::cout << "Content: " << content << std::endl;
 
     return 0;
 }
